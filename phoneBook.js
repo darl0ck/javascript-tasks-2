@@ -11,23 +11,18 @@ function Userdata(name, phone, email) {
     this.phone = phone;
     this.email = email;
 }
-function isValidEmail(email) {
-    var reg = /^[\w-]+@[\w-]+\.[a-z]{2,3}$/i;
-    return reg.test(email)
+function isValidPhone(phone) {
+    return /^((\+?\d{1,4})[\- ]?)?((\(\d{3}\)|\d{3})[\- ]?)[\d\- ]{7,10}$/.test(phone);
 }
 
-function isValidPhone(phone) {
-    var reg = /^[\d]{1}\ \([\d]{3}\) \ [\d]{3}-[\d]{2}-[\d]{3}$/;
-
-    return reg.test(phone)
+function isValidEmail(email) {
+    return /^[\w\d\.-]+@([\w\u0410-\u044F\d-]+)(\.[\w\u0410-\u044F\d]+)+$/.test(email);
 }
 module.exports.add = function add(name, phone, email) {
     if (isValidEmail(email) && isValidPhone(phone)) {
         phoneBook.push(new Userdata(name, phone, email));
-        console.log('Запись ' + name.concat(' ', phone) + 'добавлена');
         return true;
     } else {
-        console.log('Веденные данные: ' + name.concat(' ', phone) + 'не валидны');
         return false;
     }
 
@@ -36,21 +31,19 @@ module.exports.add = function add(name, phone, email) {
 
 };
 
-
+// Функция поиска индексов запрошенных элементов
 
 function search_index(query) {
-    var index = [];
-    phoneBook.forEach(function (item, i, phoneBook) {
-        if (
-            item.name.indexOf(query) +
-            item.phone.indexOf(query) +
-            item.email.indexOf(query) > -3
-        ) {
-            index.push(i);
+    var index_number = [];
+    query = (query || '').toLowerCase();
+    for (var i = 0; i < phoneBook.length; i++) {
+        if (phoneBook[i].name.toLowerCase().indexOf(query) >= 0 ||
+            phoneBook[i].phone.indexOf(query) >= 0 ||
+            phoneBook[i].email.toLowerCase().indexOf(query) >= 0) {
+            index_number.push(i);
         }
-
-    });
-    return index;
+    }
+    return index_number;
 }
 
 /*
@@ -59,10 +52,10 @@ function search_index(query) {
  */
 
 module.exports.find = function find(query) {
-    var index = query ? search_index(query).map(function (identity) {
+    var index_number = query ? search_index(query).map(function (identity) {
         return phoneBook[identity];
     }) : phoneBook;
-    index.forEach(function (notes) {
+    index_number.forEach(function (notes) {
             console.log(notes.name + ', ' + notes.phone + ', ' + notes.email)
         }
     );
@@ -76,11 +69,11 @@ module.exports.find = function find(query) {
  Функция удаления записи в телефонной книге.
  */
 module.exports.remove = function remove(query) {
-    var Format = index(query);
+    var format = search_index(query);
     phoneBook = phoneBook.filter(function (identity) {
-        return Format.indexOf(identity) < 0;
+        return format.indexOf(identity) < 0;
     });
-    console.log('Удалено контактов: ' + Format.length.toString());
+    console.log('Удалено контактов: ' + format.length.toString());
     // Ваша необьяснимая магия здесь
 
 };
